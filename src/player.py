@@ -12,7 +12,7 @@ class Player:
 
         self.on_ground = False
 
-    def hand_input(self):
+    def handle_input(self):
         keys = pygame.key.get_pressed()
 
         self.vx = 0

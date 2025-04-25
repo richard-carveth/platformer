@@ -1,5 +1,5 @@
 import pygame
-from setting import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GRAVITY
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GRAVITY
 from player import Player
 from level import Level
 

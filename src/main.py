@@ -1,11 +1,11 @@
 import pygame
-from setting import SCREEN_WIDTH, SCREE_HEIGHT, FPS, GRAVITY
+from setting import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GRAVITY
 from player import Player
 from level import Level
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREE_HEIGHT))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Platformer")
     clock = pygame.time.Clock()
 

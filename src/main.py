@@ -19,9 +19,10 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            player.handle_event(event)
 
         player.handle_input()
-        player.apply_gravity(GRAVITY, dt)
+        player.apply_gravity(dt)
         player.update(dt, level.platforms)
 
         screen.fill((135, 206, 235))

@@ -15,7 +15,6 @@ class Player:
         self.max_fall_speed = settings.MAX_FALL_SPEED
         self.facing = 1
         self.jump_count = 0
-        self.max_jumps = 2
         self.is_gliding = False
 
         self.is_dashing = False

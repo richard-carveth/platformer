@@ -1,6 +1,5 @@
 import pygame
-from settings import GRAVITY, MAX_FALL_SPEED, COYOTE_TIME, JUMP_BUFFER_TIME
-
+from settings import GRAVITY, MAX_FALL_SPEED, COYOTE_TIME, JUMP_BUFFER_TIME, DASH_TIME, DASH_SPEED
 class Player:
     def __init__(self, start_pos):
         self.pos_x = float(start_pos[0])
@@ -12,23 +11,37 @@ class Player:
         self.speed = 200
         self.jump_strength = -700
         self.max_fall_speed = MAX_FALL_SPEED
+        self.facing = 1
+
+        self.is_dashing = False
+        self.dash_timer = 0.0
+        self.can_dash = True
+        self.dash_direction = 0
 
         self.on_ground = True
         self.coyote_timer = 0.0
         self.jump_buffer_timer = 0.0
 
     def handle_event(self, event):
-        if event.type == pygame.KEYDOWN and event.key in (pygame.K_SPACE, pygame.K_w, pygame.K_UP):
-            self.jump_buffer_timer = JUMP_BUFFER_TIME
+        if event.type == pygame.KEYDOWN:
+            if event.key in (pygame.K_SPACE, pygame.K_w, pygame.K_UP):
+                self.jump_buffer_timer = JUMP_BUFFER_TIME
 
+            if event.key == pygame.K_c and (not self.is_dashing and self.can_dash):
+                self.dash_direction = self.facing
+                self.is_dashing = True
+                self.dash_timer = DASH_TIME
+                self.can_dash = False
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
         self.vx = 0
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.vx = -self.speed
+            self.facing = -1
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.vx = self.speed
+            self.facing = 1
 
     def apply_gravity(self, dt):
         self.vy += GRAVITY * dt
@@ -39,17 +52,23 @@ class Player:
             self.coyote_timer = max(0.0, self.coyote_timer - dt)
         if self.jump_buffer_timer > 0.0:
             self.jump_buffer_timer = max(0.0, self.jump_buffer_timer - dt)
+        if self.is_dashing:
+            self.dash_timer -= dt
+            if self.dash_timer <= 0:
+                self.is_dashing = False
 
-        self.pos_x += self.vx * dt
+        effective_vx = DASH_SPEED * self.dash_direction if self.is_dashing else self.vx
+
+        self.pos_x += effective_vx * dt
         self.rect.x = int(self.pos_x)
         for plat in platforms:
             if self.rect.colliderect(plat):
-                if self.vx > 0:
+                if effective_vx > 0:
                     self.rect.right = plat.left
-                elif self.vx < 0:
+                elif effective_vx < 0:
                     self.rect.left = plat.right
                 self.pos_x = float(self.rect.x)
-                self.vx = 0.0
+                effective_vx = 0
 
         self.pos_y += self.vy * dt
         self.rect.y = int(self.pos_y)
@@ -60,6 +79,7 @@ class Player:
                 if self.vy > 0:
                     self.rect.bottom = plat.top
                     self.on_ground = True
+                    self.can_dash = True
                     self.coyote_timer = COYOTE_TIME
                 elif self.vy < 0:
                     self.rect.top = plat.bottom

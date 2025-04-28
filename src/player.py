@@ -5,6 +5,8 @@ class Player:
         self.pos_x = float(start_pos[0])
         self.pos_y = float(start_pos[1])
         self.rect = pygame.Rect(int(self.pos_x), int(self.pos_y), 32, 64)
+        self.image = pygame.image.load("assets/player.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.rect.width, self.rect.height))
 
         self.vx = 0
         self.vy = 0
@@ -12,6 +14,9 @@ class Player:
         self.jump_strength = -700
         self.max_fall_speed = settings.MAX_FALL_SPEED
         self.facing = 1
+        self.jump_count = 0
+        self.max_jumps = 2
+        self.is_gliding = False
 
         self.is_dashing = False
         self.dash_timer = 0.0
@@ -36,6 +41,7 @@ class Player:
     def handle_input(self):
         keys = pygame.key.get_pressed()
         self.vx = 0
+        self.is_gliding = (keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]) and not self.on_ground and self.jump_count >= 2
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.vx = -self.speed
             self.facing = -1
@@ -44,8 +50,12 @@ class Player:
             self.facing = 1
 
     def apply_gravity(self, dt):
-        self.vy += settings.GRAVITY * dt
         self.vy = min(self.vy, self.max_fall_speed)
+        if self.is_gliding and self.vy > 0:
+            self.vy += (settings.GRAVITY * 0.3) * dt
+        else:
+            self.vy += settings.GRAVITY * dt
+
 
     def update(self, dt, platforms):
         if not self.on_ground and self.coyote_timer > 0.0:
@@ -81,16 +91,28 @@ class Player:
                     self.on_ground = True
                     self.can_dash = True
                     self.coyote_timer = settings.COYOTE_TIME
+                    self.jump_count = 0
                 elif self.vy < 0:
                     self.rect.top = plat.bottom
                 self.pos_y = float(self.rect.y)
                 self.vy = 0.0
 
-        if (self.on_ground or self.coyote_timer > 0.0) and self.jump_buffer_timer > 0.0:
+        if self.jump_count == 0 and (self.on_ground or self.coyote_timer > 0) and self.jump_buffer_timer > 0:
             self.vy = self.jump_strength
             self.on_ground = False
-            self.coyote_timer = 0.0
-            self.jump_buffer_timer = 0.0
+            self.coyote_timer = 0
+            self.jump_buffer_timer = 0
+            self.jump_count = 1
+        elif self.jump_count == 1 and self.jump_buffer_timer > 0:
+            self.vy = self.jump_strength * 0.50
+            self.jump_buffer_timer = 0
+            self.jump_count = 2
 
     def draw(self, surface):
-        pygame.draw.rect(surface, (255, 0, 0), self.rect)
+        surface.blit(self.image, self.rect.topleft)
+        #pygame.draw.rect(surface, (255, 0, 0), self.rect)
+        if self.is_gliding:
+            w, h = 52, 8
+            x, y = self.rect.topleft
+            spinning_ears = pygame.Rect(x - 10, y + 6, w, h)
+            pygame.draw.rect(surface, (255, 200, 0), spinning_ears)

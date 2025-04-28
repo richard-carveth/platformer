@@ -1,5 +1,5 @@
 import pygame
-from settings import GRAVITY, MAX_FALL_SPEED
+from settings import GRAVITY, MAX_FALL_SPEED, COYOTE_TIME, JUMP_BUFFER_TIME
 
 class Player:
     def __init__(self, start_pos):
@@ -13,12 +13,14 @@ class Player:
         self.jump_strength = -700
         self.max_fall_speed = MAX_FALL_SPEED
 
-        self.on_ground = False
+        self.on_ground = True
+        self.coyote_timer = 0.0
+        self.jump_buffer_timer = 0.0
 
     def handle_event(self, event):
-        if event.type == pygame.KEYDOWN and (event.key in (pygame.K_SPACE, pygame.K_w, pygame.K_UP) and self.on_ground):
-            self.vy = self.jump_strength
-            self.on_ground = False
+        if event.type == pygame.KEYDOWN and event.key in (pygame.K_SPACE, pygame.K_w, pygame.K_UP):
+            self.jump_buffer_timer = JUMP_BUFFER_TIME
+
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -33,6 +35,11 @@ class Player:
         self.vy = min(self.vy, self.max_fall_speed)
 
     def update(self, dt, platforms):
+        if not self.on_ground and self.coyote_timer > 0.0:
+            self.coyote_timer = max(0.0, self.coyote_timer - dt)
+        if self.jump_buffer_timer > 0.0:
+            self.jump_buffer_timer = max(0.0, self.jump_buffer_timer - dt)
+
         self.pos_x += self.vx * dt
         self.rect.x = int(self.pos_x)
         for plat in platforms:
@@ -46,15 +53,24 @@ class Player:
 
         self.pos_y += self.vy * dt
         self.rect.y = int(self.pos_y)
+        self.on_ground = False
+
         for plat in platforms:
             if self.rect.colliderect(plat):
                 if self.vy > 0:
                     self.rect.bottom = plat.top
                     self.on_ground = True
+                    self.coyote_timer = COYOTE_TIME
                 elif self.vy < 0:
                     self.rect.top = plat.bottom
                 self.pos_y = float(self.rect.y)
                 self.vy = 0.0
+
+        if (self.on_ground or self.coyote_timer > 0.0) and self.jump_buffer_timer > 0.0:
+            self.vy = self.jump_strength
+            self.on_ground = False
+            self.coyote_timer = 0.0
+            self.jump_buffer_timer = 0.0
 
     def draw(self, surface):
         pygame.draw.rect(surface, (255, 0, 0), self.rect)

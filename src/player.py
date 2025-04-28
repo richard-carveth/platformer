@@ -1,5 +1,5 @@
 import pygame
-from settings import GRAVITY, MAX_FALL_SPEED, COYOTE_TIME, JUMP_BUFFER_TIME, DASH_TIME, DASH_SPEED
+import settings
 class Player:
     def __init__(self, start_pos):
         self.pos_x = float(start_pos[0])
@@ -10,7 +10,7 @@ class Player:
         self.vy = 0
         self.speed = 200
         self.jump_strength = -700
-        self.max_fall_speed = MAX_FALL_SPEED
+        self.max_fall_speed = settings.MAX_FALL_SPEED
         self.facing = 1
 
         self.is_dashing = False
@@ -25,12 +25,12 @@ class Player:
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_SPACE, pygame.K_w, pygame.K_UP):
-                self.jump_buffer_timer = JUMP_BUFFER_TIME
+                self.jump_buffer_timer = settings.JUMP_BUFFER_TIME
 
             if event.key == pygame.K_c and (not self.is_dashing and self.can_dash):
                 self.dash_direction = self.facing
                 self.is_dashing = True
-                self.dash_timer = DASH_TIME
+                self.dash_timer = settings.DASH_TIME
                 self.can_dash = False
 
     def handle_input(self):
@@ -44,7 +44,7 @@ class Player:
             self.facing = 1
 
     def apply_gravity(self, dt):
-        self.vy += GRAVITY * dt
+        self.vy += settings.GRAVITY * dt
         self.vy = min(self.vy, self.max_fall_speed)
 
     def update(self, dt, platforms):
@@ -57,7 +57,7 @@ class Player:
             if self.dash_timer <= 0:
                 self.is_dashing = False
 
-        effective_vx = DASH_SPEED * self.dash_direction if self.is_dashing else self.vx
+        effective_vx = settings.DASH_SPEED * self.dash_direction if self.is_dashing else self.vx
 
         self.pos_x += effective_vx * dt
         self.rect.x = int(self.pos_x)
@@ -80,7 +80,7 @@ class Player:
                     self.rect.bottom = plat.top
                     self.on_ground = True
                     self.can_dash = True
-                    self.coyote_timer = COYOTE_TIME
+                    self.coyote_timer = settings.COYOTE_TIME
                 elif self.vy < 0:
                     self.rect.top = plat.bottom
                 self.pos_y = float(self.rect.y)

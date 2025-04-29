@@ -107,11 +107,19 @@ class Player:
             self.jump_buffer_timer = 0
             self.jump_count = 2
 
-    def draw(self, surface):
-        surface.blit(self.image, self.rect.topleft)
+    def draw(self, surface, cam_x, cam_y):
+        #draw_pos = (self.rect.x - cam_x, self.rect.y - cam_y)
+        #surface.blit(self.image, draw_pos)
+        #surface.blit(self.image, self.rect.topleft)
         #pygame.draw.rect(surface, (255, 0, 0), self.rect)
+
+        local_x = self.rect.x - cam_x
+        local_y = self.rect.y - cam_y
+
+        surface.blit(self.image, (local_x, local_y))
+
         if self.is_gliding:
             w, h = 52, 8
             x, y = self.rect.topleft
-            spinning_ears = pygame.Rect(x - 10, y + 6, w, h)
+            spinning_ears = pygame.Rect(local_x - 10, local_y + 6, w, h)
             pygame.draw.rect(surface, (255, 200, 0), spinning_ears)

@@ -11,6 +11,8 @@ class Level:
 
         self.player_start_pos = (50, SCREEN_HEIGHT - 100)
 
-    def draw(self, surface):
+    def draw(self, surface, cam_x, cam_y):
         for plat in self.platforms:
-            pygame.draw.rect(surface, (100, 100, 100), plat)
+            shifted_rect = plat.move(-cam_x, -cam_y)
+            pygame.draw.rect(surface, (100, 100, 100), shifted_rect)
+            #pygame.draw.rect(surface, (100, 100, 100), plat)

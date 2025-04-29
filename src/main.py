@@ -26,10 +26,16 @@ def main():
         player.handle_input()
         player.apply_gravity(dt)
         player.update(dt, level.platforms)
+        floor_y = SCREEN_HEIGHT - 50
+        level_height = floor_y + 50
+        cam_x = player.rect.centerx - SCREEN_WIDTH // 2
+        cam_y = player.rect.centery - SCREEN_HEIGHT // 2
+        cam_x = max(0, cam_x)
+        cam_y = min(cam_y, level_height - SCREEN_HEIGHT)
 
         base_surface.fill((135, 206, 235))
-        level.draw(base_surface)
-        player.draw(base_surface)
+        level.draw(base_surface, cam_x, cam_y)
+        player.draw(base_surface, cam_x, cam_y)
         window_size = screen.get_size()
         scaled = pygame.transform.smoothscale(base_surface, window_size)
         screen.blit(scaled, (0, 0))

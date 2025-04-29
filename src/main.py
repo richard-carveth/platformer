@@ -5,7 +5,9 @@ from level import Level
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    #screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+    base_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Platformer")
     clock = pygame.time.Clock()
 
@@ -25,9 +27,12 @@ def main():
         player.apply_gravity(dt)
         player.update(dt, level.platforms)
 
-        screen.fill((135, 206, 235))
-        level.draw(screen)
-        player.draw(screen)
+        base_surface.fill((135, 206, 235))
+        level.draw(base_surface)
+        player.draw(base_surface)
+        window_size = screen.get_size()
+        scaled = pygame.transform.smoothscale(base_surface, window_size)
+        screen.blit(scaled, (0, 0))
         pygame.display.flip()
 
     pygame.quit()

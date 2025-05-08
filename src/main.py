@@ -3,6 +3,13 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from player import Player
 from level import Level
 
+def draw_main_menu(surface):
+    surface.fill((30, 30, 30))
+    font = pygame.font.Font(None, 72)
+    text = font.render("Press ENTER to Start", True, (255, 255, 255))
+    rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    surface.blit(text, rect)
+
 def main():
     # Initializes pygame and it's modules
     pygame.init()
@@ -17,6 +24,9 @@ def main():
     pygame.display.set_caption("Platformer")
     clock = pygame.time.Clock()
 
+    # Determines the current game state
+    current_state = "menu"
+
     # Initializes the level and player
     level = Level()
     player = Player(level.player_start_pos)
@@ -29,28 +39,35 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT: # Check for window closure
                 running = False
-            player.handle_event(event) # Allows for player inputs
+            if current_state == "menu":
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    current_state = "playing"
+            elif current_state == "playing":
+                player.handle_event(event) # Allows for player inputs
 
-        player.handle_input() # Continuous player inputs (movement etc)
-        player.apply_gravity(dt) # Applies gravity physics
-        player.update(dt, level.platforms) # Updates player positon and collision
+        if current_state == "playing":
+            player.handle_input() # Continuous player inputs (movement etc)
+            player.apply_gravity(dt) # Applies gravity physics
+            player.update(dt, level.platforms) # Updates player positon and collision
 
-        # Floor and camera boundries
-        floor_y = SCREEN_HEIGHT - 50
-        level_height = floor_y + 50
+            # Floor and camera boundries
+            floor_y = SCREEN_HEIGHT - 50
+            level_height = floor_y + 50
 
-        # Calculates camera positon to follow the player
-        cam_x = player.rect.centerx - SCREEN_WIDTH // 2
-        cam_y = player.rect.centery - SCREEN_HEIGHT // 2
+            # Calculates camera positon to follow the player
+            cam_x = player.rect.centerx - SCREEN_WIDTH // 2
+            cam_y = player.rect.centery - SCREEN_HEIGHT // 2
 
-        # Stops the camera showing areas outside of the level
-        cam_x = max(0, cam_x)
-        cam_y = min(cam_y, level_height - SCREEN_HEIGHT)
+            # Stops the camera showing areas outside of the level
+            cam_x = max(0, cam_x)
+            cam_y = min(cam_y, level_height - SCREEN_HEIGHT)
 
-        # Draws the surface of the window
-        base_surface.fill((135, 206, 235))
-        level.draw(base_surface, cam_x, cam_y)
-        player.draw(base_surface, cam_x, cam_y)
+            # Draws the surface of the window
+            base_surface.fill((135, 206, 235))
+            level.draw(base_surface, cam_x, cam_y)
+            player.draw(base_surface, cam_x, cam_y)
+        elif current_state == "menu":
+            draw_main_menu(base_surface)
 
         # Scales everything based on screen size
         window_size = screen.get_size()

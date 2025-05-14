@@ -10,8 +10,15 @@ def draw_main_menu(surface):
     rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     surface.blit(text, rect)
 
+def draw_pause_menu(surface):
+    surface.fill((30, 30, 30))
+    font = pygame.font.Font(None, 72)
+    text = font.render("PAUSED Press ESC to continue", True, (255, 255, 255))
+    rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    surface.blit(text, rect)
+
 def main():
-    # Initializes pygame and it's modules
+    # Initializes pygame and its modules
     pygame.init()
 
     # Allows for a resizable game window
@@ -43,7 +50,13 @@ def main():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     current_state = "playing"
             elif current_state == "playing":
-                player.handle_event(event) # Allows for player inputs
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    current_state = "paused"
+                else:
+                    player.handle_event(event) # Allows for player inputs
+            elif current_state == "paused":
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    current_state = "playing"
 
         if current_state == "playing":
             player.handle_input() # Continuous player inputs (movement etc)
@@ -68,11 +81,15 @@ def main():
             player.draw(base_surface, cam_x, cam_y)
         elif current_state == "menu":
             draw_main_menu(base_surface)
+        elif current_state == "paused":
+            draw_pause_menu(base_surface)
 
         # Scales everything based on screen size
         window_size = screen.get_size()
-        scaled = pygame.transform.smoothscale(base_surface, window_size)
-        screen.blit(scaled, (0, 0))
+        base_surface_scaled = pygame.transform.smoothscale(
+            base_surface, window_size
+        )
+        screen.blit(base_surface_scaled, (0, 0))
 
         # Updates the display with everything drawn
         pygame.display.flip()

@@ -37,6 +37,7 @@ def main():
     # Initializes the level and player
     level = Level()
     player = Player(level.player_start_pos)
+    level.maybe_generate_more(player)
 
     running = True  # Game loop flag
     while running:

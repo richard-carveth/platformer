@@ -37,7 +37,6 @@ def main():
     # Initializes the level and player
     level = Level()
     player = Player(level.player_start_pos)
-    level.maybe_generate_more(player)
 
     running = True  # Game loop flag
     while running:
@@ -60,6 +59,7 @@ def main():
                     current_state = "playing"
 
         if current_state == "playing":
+            level.maybe_generate_more(player) # Draws the level as the player moves
             player.handle_input() # Continuous player inputs (movement etc)
             player.apply_gravity(dt) # Applies gravity physics
             player.update(dt, level.platforms) # Updates player positon and collision
